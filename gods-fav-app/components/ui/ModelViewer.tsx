@@ -27,11 +27,11 @@ export default function ModelViewer({ url, width = 400, height = 400 }: ModelVie
     mv.style.backgroundColor = "transparent"
     mv.style.outline = "none"
 
-    containerRef.current.innerHTML = ""
-    containerRef.current.appendChild(mv)
+    const node = containerRef.current
+    node.appendChild(mv)
 
     return () => {
-      if (containerRef.current) containerRef.current.innerHTML = ""
+      node.innerHTML = ""
     }
   }, [url])
 

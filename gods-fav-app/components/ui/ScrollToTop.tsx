@@ -1,20 +1,17 @@
 "use client"
 import { motion, useScroll, useAnimationControls } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import Magnet from "@/components/reactbits/Magnet"
 
 export default function ScrollToTop() {
   const { scrollY } = useScroll()
   const controls = useAnimationControls()
-  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
       if (latest > 300) {
-        setIsVisible(true)
         controls.start({ opacity: 1, scale: 1, y: 0, pointerEvents: "auto" })
       } else {
-        setIsVisible(false)
         controls.start({ opacity: 0, scale: 0.8, y: 20, pointerEvents: "none" })
       }
     })
