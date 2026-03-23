@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;font-family:'Courier New',monospace;color:#fff;overflow-x:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* ── GRAIN ── */
+.grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:9000;opacity:.06;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain .4s steps(2) infinite}
+@keyframes grain{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}75%{transform:translate(1px,-2px)}}
+
+/* ── LAYOUT ── */
+.page{display:flex;flex-direction:column;width:100%}
+
+/* ── ANNOTATION BAR ── */
+.anno-bar{background:#050505;border-left:2px solid #8B0000;padding:5px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.anno-tag{font-size:8px;color:#8B0000;letter-spacing:.2em;text-transform:uppercase}
+.anno-desc{font-size:8px;color:#2a2a2a;letter-spacing:.08em}
+.anno-pkg{font-size:8px;color:#0f2a0f;margin-left:auto;font-family:'Courier New'}
+
+/* ── NAV ── */
+.nav-section{position:relative;height:52px;background:#050505;border-bottom:1px solid #141414;display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;overflow:hidden}
+.nav-bg-threads{position:absolute;inset:0;opacity:.3}
+.nav-logo{font-size:13px;letter-spacing:.4em;color:#e8e0d8;text-transform:uppercase;position:relative;z-index:1}
+.nav-links{display:flex;gap:24px;position:relative;z-index:1}
+.nav-link{font-size:9px;letter-spacing:.22em;color:#333;text-transform:uppercase;position:relative;cursor:pointer;transition:color .25s}
+.nav-link:hover{color:#fff}
+.nav-link.active{color:#777}
+.nav-link.active::after{content:'';position:absolute;bottom:-4px;left:0;width:100%;height:1px;background:#8B0000}
+.nav-icons{display:flex;gap:14px;position:relative;z-index:1}
+.nav-icon{width:16px;height:16px;opacity:.35}
+
+/* ── HERO ── */
+.hero-section{position:relative;height:340px;overflow:hidden;flex-shrink:0}
+.hero-hyperspeed{position:absolute;inset:0;background:#000}
+
+/* Hyperspeed warp stars */
+.hero-hyperspeed canvas{position:absolute;inset:0}
+
+/* Depth grid on hero floor */
+.hero-depth-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(139,0,0,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(139,0,0,.08) 1px,transparent 1px);
+  background-size:50px 50px;
+  transform:perspective(500px) rotateX(40deg) scale(1.6);transform-origin:50% 100%;opacity:.5}
+
+.hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 20%,rgba(0,0,0,.75) 70%,rgba(50,0,0,.6) 100%)}
+
+/* Orb glow */
+.hero-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:280px;
+  background:radial-gradient(circle,rgba(139,0,0,.18) 0%,rgba(80,0,0,.08) 40%,transparent 70%);
+  animation:orb-pulse 4s ease-in-out infinite;border-radius:50%}
+@keyframes orb-pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6}50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}}
+
+/* Aurora layers */
+.hero-aurora-1{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 30% 60%,rgba(100,0,0,.2) 0%,transparent 70%);animation:aurora1 6s ease-in-out infinite alternate}
+.hero-aurora-2{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 70% 40%,rgba(60,0,0,.15) 0%,transparent 70%);animation:aurora2 8s ease-in-out infinite alternate}
+@keyframes aurora1{from{transform:translateX(-5%) scale(1)}to{transform:translateX(5%) scale(1.05)}}
+@keyframes aurora2{from{transform:translateX(5%) scale(1.05)}to{transform:translateX(-5%) scale(1)}}
+
+/* Corner brackets */
+.bracket{position:absolute;width:28px;height:28px}
+.bracket svg{width:100%;height:100%;animation:bracket-pulse 2s ease-in-out infinite}
+@keyframes bracket-pulse{0%,100%{opacity:.45}50%{opacity:1}}
+.bracket.tl{top:14px;left:14px}
+.bracket.tr{top:14px;right:14px;transform:scaleX(-1)}
+.bracket.bl{bottom:14px;left:14px;transform:scaleY(-1)}
+.bracket.br{bottom:14px;right:14px;transform:scale(-1)}
+
+.hero-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:2}
+.hero-eyebrow{font-size:8px;letter-spacing:.5em;color:#333;text-transform:uppercase}
+.hero-tag-line1{font-size:14px;letter-spacing:.35em;color:#b8b0a8;font-family:serif}
+.hero-title{font-size:88px;line-height:.9;font-weight:900;letter-spacing:-.02em;font-family:Impact,sans-serif;
+  color:#fff;text-shadow:0 0 60px rgba(139,0,0,.6),0 0 120px rgba(139,0,0,.25);
+  animation:title-glow 3s ease-in-out infinite}
+@keyframes title-glow{0%,100%{text-shadow:0 0 60px rgba(139,0,0,.5),0 0 120px rgba(139,0,0,.2)}50%{text-shadow:0 0 80px rgba(139,0,0,.9),0 0 160px rgba(139,0,0,.4)}}
+.hero-title span{color:#8B0000}
+.hero-sub{font-size:9px;letter-spacing:.2em;color:#2a2a2a;margin-top:4px}
+.hero-cta{margin-top:10px;padding:8px 22px;border:1px solid #8B0000;color:#8B0000;font-size:9px;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;transition:all .2s;background:transparent}
+.hero-cta:hover{background:#8B0000;color:#fff}
+
+/* scroll indicator */
+.scroll-ind{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px}
+.scroll-line{width:1px;background:linear-gradient(to bottom,#8B0000,transparent);animation:scroll-pulse 1.8s ease-in-out infinite}
+@keyframes scroll-pulse{0%,100%{height:20px;opacity:.4}50%{height:32px;opacity:1}}
+.scroll-txt{font-size:7px;color:#333;letter-spacing:.3em}
+
+/* ── MARQUEE ── */
+.marquee-section{height:34px;display:flex;align-items:center;overflow:hidden;border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a;background:#000;position:relative;flex-shrink:0}
+/* Floating lines bg on marquee */
+.marquee-floatlines{position:absolute;inset:0;overflow:hidden;opacity:.15}
+.fline{position:absolute;height:1px;background:linear-gradient(90deg,transparent,#8B0000,transparent);animation:fline-move linear infinite}
+@keyframes fline-move{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+.marquee-track{display:flex;gap:36px;white-space:nowrap;font-size:10px;letter-spacing:.3em;color:#2a2a2a;text-transform:uppercase;animation:marquee 20s linear infinite;position:relative;z-index:1}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.m-dot{color:#8B0000}
+
+/* ── ABOUT ── */
+.about-section{position:relative;display:grid;grid-template-columns:1fr 1fr;min-height:280px;border-top:1px solid #141414;overflow:hidden;flex-shrink:0}
+
+/* Left col — Threads background */
+.about-left{position:relative;padding:44px 40px;border-right:1px solid #141414;overflow:hidden}
+.about-threads-bg{position:absolute;inset:0}
+.about-content{position:relative;z-index:1}
+.about-overline{font-size:8px;color:#8B0000;letter-spacing:.5em;text-transform:uppercase;margin-bottom:16px}
+.about-heading{font-size:32px;font-family:serif;line-height:1.05;margin-bottom:14px;letter-spacing:.02em}
+.about-heading em{color:#8B0000;font-style:normal}
+.about-rule{width:40px;height:1px;background:#8B0000;margin-bottom:14px;animation:rule-grow 2s ease forwards}
+@keyframes rule-grow{from{width:0}to{width:40px}}
+.about-body{font-size:10px;color:#3a3a3a;line-height:2.1;max-width:260px;margin-bottom:20px}
+.about-stats{display:flex;gap:24px}
+.stat-num{font-size:24px;font-family:Impact,sans-serif;color:#fff;letter-spacing:.05em}
+.stat-label{font-size:7px;color:#2a2a2a;letter-spacing:.25em;text-transform:uppercase;margin-top:2px}
+
+/* Right col — Silk / Iridescence background */
+.about-right{position:relative;padding:44px 40px;background:#050505;overflow:hidden}
+.about-silk-bg{position:absolute;inset:0}
+.about-right-content{position:relative;z-index:1}
+.about-quote{font-size:20px;font-family:serif;color:#fff;text-align:center;margin-bottom:24px;
+  text-shadow:0 0 30px rgba(139,0,0,.4);letter-spacing:.04em}
+.value-card{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid #141414;background:#080808;margin-bottom:8px;transition:border-color .2s}
+.value-card:hover{border-color:#8B0000}
+.value-dot{width:4px;height:4px;background:#8B0000;flex-shrink:0}
+.value-text{font-size:9px;letter-spacing:.15em;color:#333;text-transform:uppercase}
+.value-text strong{color:#666}
+
+/* ── VISION ── */
+.vision-section{position:relative;min-height:240px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-top:1px solid #141414;flex-shrink:0}
+/* Plasma/Aurora bg */
+.vision-plasma{position:absolute;inset:0}
+.vision-content{position:relative;z-index:1;text-align:center;padding:60px 40px;max-width:640px}
+.vision-ghost{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:160px;font-family:Impact,sans-serif;color:#fff;opacity:.025;letter-spacing:-.02em;pointer-events:none;user-select:none;animation:ghost-rot 10s ease-in-out infinite}
+@keyframes ghost-rot{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(1.5deg) scale(1.01)}}
+.vision-eyebrow{font-size:8px;color:#8B0000;letter-spacing:.5em;text-transform:uppercase;margin-bottom:16px}
+.vision-q1{font-size:26px;font-family:serif;color:#b8b0a8;letter-spacing:.04em;margin-bottom:4px}
+.vision-q2{font-size:26px;font-family:serif;color:#fff;letter-spacing:.04em}
+.vision-q2 span{color:#8B0000}
+.vision-line{width:60px;height:1px;background:#8B0000;margin:20px auto;animation:vision-line 3s ease-in-out infinite;opacity:.7}
+@keyframes vision-line{0%,100%{width:60px;opacity:.5}50%{width:90px;opacity:1}}
+.vision-body{font-size:10px;color:#2a2a2a;line-height:2.2;letter-spacing:.08em}
+
+/* ── CONTACT ── */
+.contact-section{position:relative;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #141414;overflow:hidden;flex-shrink:0}
+/* Waves bg on contact */
+.contact-waves-bg{position:absolute;inset:0}
+.contact-left{position:relative;padding:50px 40px;z-index:1}
+.contact-overline{font-size:8px;color:#8B0000;letter-spacing:.5em;text-transform:uppercase;margin-bottom:12px}
+.contact-heading{font-size:52px;font-family:Impact,sans-serif;letter-spacing:.03em;line-height:.9;margin-bottom:16px}
+.contact-heading span{color:#8B0000}
+.contact-sub{font-size:10px;color:#2a2a2a;line-height:2;margin-bottom:20px}
+.contact-link{display:flex;align-items:center;padding:11px 14px;border:1px solid #141414;font-size:9px;color:#333;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-bottom:6px}
+.contact-link:hover{border-color:#8B0000;color:#8B0000}
+.contact-link-arrow{margin-left:auto;color:#8B0000}
+
+.contact-right{position:relative;padding:50px 40px;border-left:1px solid #141414;z-index:1}
+.form-field{border:none;border-bottom:1px solid #1a1a1a;padding:9px 0;font-size:9px;color:#444;letter-spacing:.2em;text-transform:uppercase;display:block;width:100%;margin-bottom:12px;background:transparent}
+.form-submit{padding:12px 24px;background:#8B0000;color:#fff;font-size:9px;letter-spacing:.3em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s;margin-top:8px}
+.form-submit:hover{background:#CC2200}
+
+/* ── FOOTER ── */
+.footer-section{background:#000;border-top:2px solid #8B0000;padding:22px 36px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.footer-logo{font-size:10px;letter-spacing:.35em;color:#1a1a1a;text-transform:uppercase}
+.footer-copy{font-size:8px;color:#141414;letter-spacing:.12em}
+.footer-links{display:flex;gap:14px}
+.footer-link{font-size:8px;color:#1a1a1a;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:color .2s}
+.footer-link:hover{color:#8B0000}
+
+/* ── LEGEND ── */
+.legend-row{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #1a1a1a;flex-shrink:0}
+.legend-swatch{padding:12px 8px;border-right:1px solid #1a1a1a}
+.legend-swatch:last-child{border-right:none}
+.swatch-name{font-size:7px;letter-spacing:.2em;text-transform:uppercase}
+.swatch-hex{font-size:7px;margin-top:3px}
+
+.font-legend{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #141414;flex-shrink:0}
+.font-card{padding:14px;border-right:1px solid #141414}
+.font-card:last-child{border-right:none}
+.font-label{font-size:7px;color:#8B0000;letter-spacing:.3em;text-transform:uppercase;margin-bottom:6px}
+.font-sample-1{font-size:20px;font-family:Impact,sans-serif;color:#fff;letter-spacing:.05em}
+.font-sample-2{font-size:12px;font-family:serif;color:#666;letter-spacing:.08em}
+.font-sample-3{font-size:10px;font-family:'Courier New',monospace;color:#444;letter-spacing:.1em}
+.font-desc{font-size:7px;color:#1a1a1a;letter-spacing:.1em;margin-top:4px}
+
+/* BG component labels */
+.bg-tag{position:absolute;top:6px;right:8px;font-size:7px;color:#8B0000;letter-spacing:.2em;text-transform:uppercase;opacity:.6;z-index:10;pointer-events:none}
+
+/* ── ANIMATED BACKGROUNDS ── */
+
+/* THREADS — nav */
+.thread-canvas{position:absolute;inset:0;overflow:hidden}
+.thread{position:absolute;height:1px;opacity:.08;transform-origin:left center}
+
+/* SILK / IRIDESCENCE — about right col */
+.silk-canvas{position:absolute;inset:0}
+
+/* PLASMA — vision */
+.plasma-canvas{position:absolute;inset:0}
+
+/* WAVES — contact */
+.wave-canvas{position:absolute;inset:0}
+
+</style>
+</head>
+<body>
+<div class="grain-overlay"></div>
+<div class="page">
+
+<!-- ═══════════════════════════════════
+     NAV — Threads background
+     ═══════════════════════════════════ -->
+<div class="nav-section">
+  <div class="bg-tag">Threads</div>
+  <canvas id="threads-canvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:.25"></canvas>
+  <div class="nav-logo">God's Fav</div>
+  <div class="nav-links">
+    <div class="nav-link active">About</div>
+    <div class="nav-link">Vision</div>
+    <div class="nav-link">Contact</div>
+  </div>
+  <div class="nav-icons">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#666" stroke-width="1"/><circle cx="8" cy="6" r="2.5" stroke="#666" stroke-width="1"/><path d="M3 14c0-2.8 2.2-4 5-4s5 1.2 5 4" stroke="#666" stroke-width="1"/></svg>
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1" stroke="#666" stroke-width="1"/><path d="M2 5l6 5 6-5" stroke="#666" stroke-width="1"/></svg>
+  </div>
+</div>
+<div class="anno-bar">
+  <span class="anno-tag">nav</span>
+  <span class="anno-desc">Threads bg · MUI AppBar overridden · Framer Motion mount stagger · Magnet links · blur on scroll</span>
+  <span class="anno-pkg">Threads · framer-motion · @mui/material · lenis.scrollTo</span>
+</div>
+
+<!-- ═══════════════════════════════════
+     HERO — Hyperspeed + Orb + Aurora
+     ═══════════════════════════════════ -->
+<div class="hero-section">
+  <div class="bg-tag">Hyperspeed + Orb + Aurora</div>
+  <canvas id="hyperspeed-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  <div class="hero-depth-grid"></div>
+  <div class="hero-aurora-1"></div>
+  <div class="hero-aurora-2"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-vignette"></div>
+  <div class="bracket tl"><svg viewBox="0 0 28 28" fill="none"><path d="M28 2H2V28" stroke="#8B0000" stroke-width="1.5"/></svg></div>
+  <div class="bracket tr"><svg viewBox="0 0 28 28" fill="none"><path d="M28 2H2V28" stroke="#8B0000" stroke-width="1.5"/></svg></div>
+  <div class="bracket bl"><svg viewBox="0 0 28 28" fill="none"><path d="M28 2H2V28" stroke="#8B0000" stroke-width="1.5"/></svg></div>
+  <div class="bracket br"><svg viewBox="0 0 28 28" fill="none"><path d="M28 2H2V28" stroke="#8B0000" stroke-width="1.5"/></svg></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Est. 2025 · Underground Label</div>
+    <div class="hero-tag-line1">GOD'S</div>
+    <div class="hero-title"><span>FAV</span></div>
+    <div class="hero-sub">The chosen wear the void.</div>
+    <div class="hero-cta">Discover →</div>
+  </div>
+  <div class="scroll-ind"><div class="scroll-line"></div><div class="scroll-txt">Scroll</div></div>
+</div>
+<div class="anno-bar">
+  <span class="anno-tag">hero</span>
+  <span class="anno-desc">Hyperspeed warp field · Orb glow pulse · Aurora ambient · Depth grid · SplitText FAV · BlurText sub · Magnet CTA</span>
+  <span class="anno-pkg">Hyperspeed · Orb · Aurora · Noise · react-bits SplitText · GSAP</span>
+</div>
+
+<!-- ═══════════════════════════════════
+     MARQUEE — Floating Lines bg
+     ═══════════════════════════════════ -->
+<div class="marquee-section">
+  <div class="bg-tag">Floating Lines</div>
+  <div class="marquee-floatlines" id="float-lines"></div>
+  <div class="marquee-track">
+    <span>God's Fav</span><span class="m-dot">◆</span>
+    <span>Wear the void</span><span class="m-dot">◆</span>
+    <span>Born chosen</span><span class="m-dot">◆</span>
+    <span>Dark culture</span><span class="m-dot">◆</span>
+    <span>Not for everyone</span><span class="m-dot">◆</span>
+    <span>SS 2025</span><span class="m-dot">◆</span>
+    <span>God's Fav</span><span class="m-dot">◆</span>
+    <span>Wear the void</span><span class="m-dot">◆</span>
+    <span>Born chosen</span><span class="m-dot">◆</span>
+    <span>Dark culture</span><span class="m-dot">◆</span>
+    <span>Not for everyone</span><span class="m-dot">◆</span>
+    <span>SS 2025</span><span class="m-dot">◆</span>
+  </div>
+</div>
+<div class="anno-bar">
+  <span class="anno-tag">ticker</span>
+  <span class="anno-desc">Floating Lines bg · framer-motion infinite · pauses hover · crimson ◆ separators</span>
+  <span class="anno-pkg">FloatingLines · framer-motion</span>
+</div>
+
+<!-- ═══════════════════════════════════
+     ABOUT — Threads left · Silk right
+     ═══════════════════════════════════ -->
+<div class="about-section">
+  <div class="bg-tag">Threads + Silk</div>
+  <!-- Left: Threads -->
+  <div class="about-left">
+    <canvas id="threads2-canvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:.15"></canvas>
+    <div class="about-content">
+      <div class="about-overline">About the Brand</div>
+      <div class="about-heading">We don't follow.<br>We <em>lead.</em></div>
+      <div class="about-rule"></div>
+      <div class="about-body">
+        God's Fav is a dark streetwear label born from the underground.
+        No trends. No compromise. Crafted for those who were chosen.
+      </div>
+      <div class="about-stats">
+        <div><div class="stat-num">001</div><div class="stat-label">Origin Drop</div></div>
+        <div><div class="stat-num">∞</div><div class="stat-label">Always Limited</div></div>
+        <div><div class="stat-num">SS25</div><div class="stat-label">Season</div></div>
+      </div>
+    </div>
+  </div>
+  <!-- Right: Silk/Iridescence -->
+  <div class="about-right">
+    <canvas id="silk-canvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:.35"></canvas>
+    <div class="about-right-content">
+      <div class="about-quote">"Armor, not fashion."</div>
+      <div class="value-card"><div class="value-dot"></div><div class="value-text"><strong>Uncompromising</strong> — no dilution</div></div>
+      <div class="value-card"><div class="value-dot"></div><div class="value-text"><strong>Limited</strong> — every drop runs out</div></div>
+      <div class="value-card"><div class="value-dot"></div><div class="value-text"><strong>Underground</strong> — not for everyone</div></div>
+    </div>
+  </div>
+</div>
+<div class="anno-bar">
+  <span class="anno-tag">about</span>
+  <span class="anno-desc">Threads bg left · Silk/Iridescence right · GSAP SplitText word reveal · BlurText · SpotlightCard · GSAP counter stats</span>
+  <span class="anno-pkg">Threads · Silk · Iridescence · react-bits SpotlightCard · BlurText · gsap ScrollTrigger</span>
+</div>
+
+<!-- ═══════════════════════════════════
+     VISION — Plasma / Dark Veil
+     ═══════════════════════════════════ -->
+<div class="vision-section">
+  <div class="bg-tag">Plasma + Dark Veil</div>
+  <canvas id="plasma-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  <div class="vision-ghost">GF</div>
+  <div class="vision-content">
+    <div class="vision-eyebrow">Our Vision</div>
+    <div class="vision-q1">We were not built for now.</div>
+    <div class="vision-q2">We were built for forever<span>.</span></div>
+    <div class="vision-line"></div>
+    <div class="vision-body">Crafted for the few. Remembered by all.<br>Dark culture has a uniform — this is it.</div>
+  </div>
+</div>
+<div class="anno-bar">
+  <span class="anno-tag">vision</span>
+  <span class="anno-desc">Plasma bg · Dark Veil overlay · TrueFocus sweep on quote · ghost watermark rotates · crimson line pulses</span>
+  <span class="anno-pkg">Plasma · DarkVeil · react-bits TrueFocus · Noise</span>
+</div>
+
+<!-- ═══════════════════════════════════
+     CONTACT — Waves bg
+     ═══════════════════════════════════ -->
+<div class="contact-section">
+  <div class="bg-tag">Waves</div>
+  <canvas id="waves-canvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:.4"></canvas>
+  <div class="contact-left">
+    <div class="contact-overline">Get in Touch</div>
+    <div class="contact-heading">Let's<br><span>Talk.</span></div>
+    <div class="contact-sub">Collabs, press & partnerships.<br>We respond to those who move right.</div>
+    <div class="contact-link">Instagram <span class="contact-link-arrow">→</span></div>
+    <div class="contact-link">Email us directly <span class="contact-link-arrow">→</span></div>
+    <div class="contact-link">Collab inquiry <span class="contact-link-arrow">→</span></div>
+  </div>
+  <div class="contact-right">
+    <div class="form-field">Name _</div>
+    <div class="form-field">Email _</div>
+    <div class="form-field" style="height:56px;padding-top:9px">Message _</div>
+    <div class="form-submit">Send →</div>
+  </div>
+</div>
+<div class="anno-bar">
+  <span class="anno-tag">contact</span>
+  <span class="anno-desc">Waves animated bg · MUI TextField standard · Magnet on submit · link hover crimson · form success state</span>
+  <span class="anno-pkg">Waves · MUI TextField · react-bits Magnet · framer-motion</span>
+</div>
+
+<!-- ═══════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════ -->
+<div class="footer-section">
+  <div class="footer-logo">God's Fav</div>
+  <div class="footer-links">
+    <div class="footer-link">Privacy</div>
+    <div class="footer-link">Instagram</div>
+    <div class="footer-link">Contact</div>
+  </div>
+  <div class="footer-copy">© 2025 God's Fav. All Rights Reserved.</div>
+</div>
+<div class="anno-bar">
+  <span class="anno-tag">footer</span>
+  <span class="anno-desc">2px crimson top stripe · Noise overlay · minimal · social hover</span>
+  <span class="anno-pkg">Noise · react-bits</span>
+</div>
+
+<!-- ═══════════════════════════════════
+     DESIGN SYSTEM LEGEND
+     ═══════════════════════════════════ -->
+<div style="border-top:1px solid #141414;padding:8px 10px;background:#050505">
+  <div style="font-size:8px;color:#333;letter-spacing:.3em;text-transform:uppercase;margin-bottom:6px">Design System</div>
+</div>
+<div class="legend-row">
+  <div class="legend-swatch" style="background:#000"><div class="swatch-name" style="color:#2a2a2a">Void</div><div class="swatch-hex" style="color:#1a1a1a">#000</div></div>
+  <div class="legend-swatch" style="background:#080808"><div class="swatch-name" style="color:#2a2a2a">Deep</div><div class="swatch-hex" style="color:#1a1a1a">#080808</div></div>
+  <div class="legend-swatch" style="background:#111"><div class="swatch-name" style="color:#333">Surface</div><div class="swatch-hex" style="color:#222">#111</div></div>
+  <div class="legend-swatch" style="background:#2a2a2a"><div class="swatch-name" style="color:#444">Ash</div><div class="swatch-hex" style="color:#333">#2A2A2A</div></div>
+  <div class="legend-swatch" style="background:#8B0000"><div class="swatch-name" style="color:#ff8888">Blood</div><div class="swatch-hex" style="color:#cc3333">#8B0000</div></div>
+  <div class="legend-swatch" style="background:#E8E2D9"><div class="swatch-name" style="color:#666">Bone</div><div class="swatch-hex" style="color:#888">#E8E2D9</div></div>
+  <div class="legend-swatch" style="background:#555"><div class="swatch-name" style="color:#888">Ghost</div><div class="swatch-hex" style="color:#777">#555</div></div>
+</div>
+<div class="font-legend">
+  <div class="font-card"><div class="font-label">Display</div><div class="font-sample-1">BEBAS NEUE</div><div class="font-desc">Headlines · 90–160px · all-caps</div></div>
+  <div class="font-card"><div class="font-label">Ceremonial</div><div class="font-sample-2">Cinzel Decorative</div><div class="font-desc">Brand statements · gothic serif</div></div>
+  <div class="font-card"><div class="font-label">Body + Nav</div><div class="font-sample-3">Space Mono · BARLOW CONDENSED</div><div class="font-desc">13–14px body · nav labels · CTAs</div></div>
+</div>
+
+<!-- BG COMPONENT MAP -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #141414;flex-shrink:0">
+  <div style="padding:10px 12px;border-right:1px solid #141414">
+    <div style="font-size:7px;color:#8B0000;letter-spacing:.3em;margin-bottom:6px">HERO</div>
+    <div style="font-size:8px;color:#333;line-height:1.8">Hyperspeed warp<br>Orb glow pulse<br>Aurora ambient<br>Noise grain<br>Depth perspective grid</div>
+  </div>
+  <div style="padding:10px 12px;border-right:1px solid #141414">
+    <div style="font-size:7px;color:#8B0000;letter-spacing:.3em;margin-bottom:6px">ABOUT</div>
+    <div style="font-size:8px;color:#333;line-height:1.8">Threads (left col)<br>Silk / Iridescence (right col)<br>SpotlightCard on values</div>
+  </div>
+  <div style="padding:10px 12px;border-right:1px solid #141414">
+    <div style="font-size:7px;color:#8B0000;letter-spacing:.3em;margin-bottom:6px">VISION</div>
+    <div style="font-size:8px;color:#333;line-height:1.8">Plasma animation<br>Dark Veil overlay<br>Ripple Grid (subtle)</div>
+  </div>
+  <div style="padding:10px 12px">
+    <div style="font-size:7px;color:#8B0000;letter-spacing:.3em;margin-bottom:6px">CONTACT</div>
+    <div style="font-size:8px;color:#333;line-height:1.8">Waves bg<br>Grid Scan overlay<br>Grain texture</div>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+// ── THREADS (NAV + ABOUT LEFT) ──────────────────────────────
+function drawThreads(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, threads = [];
+
+  function resize() {
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W; canvas.height = H;
+    threads = Array.from({length: 8}, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      len: 60 + Math.random() * 100,
+      angle: Math.random() * Math.PI * 2,
+      da: (Math.random() - 0.5) * 0.004,
+      opacity: 0.1 + Math.random() * 0.2
+    }));
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    threads.forEach(t => {
+      t.x += t.vx; t.y += t.vy; t.angle += t.da;
+      if (t.x < -t.len) t.x = W + t.len;
+      if (t.x > W + t.len) t.x = -t.len;
+      if (t.y < -t.len) t.y = H + t.len;
+      if (t.y > H + t.len) t.y = -t.len;
+      const ex = t.x + Math.cos(t.angle) * t.len;
+      const ey = t.y + Math.sin(t.angle) * t.len;
+      const g = ctx.createLinearGradient(t.x, t.y, ex, ey);
+      g.addColorStop(0, `rgba(139,0,0,0)`);
+      g.addColorStop(0.5, `rgba(139,0,0,${t.opacity})`);
+      g.addColorStop(1, `rgba(139,0,0,0)`);
+      ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(ex, ey);
+      ctx.strokeStyle = g; ctx.lineWidth = 0.8; ctx.stroke();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+drawThreads('threads-canvas');
+drawThreads('threads2-canvas');
+
+// ── HYPERSPEED (HERO) ────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('hyperspeed-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W; canvas.height = H;
+    stars = Array.from({length: 180}, () => ({
+      x: (Math.random() - 0.5) * W,
+      y: (Math.random() - 0.5) * H,
+      z: Math.random() * W,
+      pz: 0
+    }));
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillRect(0, 0, W, H);
+    const cx = W/2, cy = H/2;
+    const speed = 4;
+
+    stars.forEach(s => {
+      s.pz = s.z;
+      s.z -= speed;
+      if (s.z <= 0) { s.z = W; s.x = (Math.random()-0.5)*W; s.y = (Math.random()-0.5)*H; s.pz = s.z; }
+
+      const sx = (s.x / s.z) * W + cx;
+      const sy = (s.y / s.z) * H + cy;
+      const px = (s.x / s.pz) * W + cx;
+      const py = (s.y / s.pz) * H + cy;
+      const size = Math.max(0.2, (1 - s.z/W) * 2);
+      const bright = 1 - s.z/W;
+      const r = Math.floor(139 * bright + 50 * bright);
+      const g2 = 0; const b2 = 0;
+
+      ctx.beginPath();
+      ctx.moveTo(px, py); ctx.lineTo(sx, sy);
+      ctx.strokeStyle = `rgba(${Math.min(255,r+180)},${g2},${b2},${bright * 0.7})`;
+      ctx.lineWidth = size;
+      ctx.stroke();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── SILK / IRIDESCENCE (ABOUT RIGHT) ────────────────────────
+(function() {
+  const canvas = document.getElementById('silk-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, t = 0;
+
+  function resize() {
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W; canvas.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    t += 0.006;
+    ctx.clearRect(0, 0, W, H);
+    for (let i = 0; i < 6; i++) {
+      const y = H * (i / 5);
+      const wave = Math.sin(t + i * 0.8) * 30;
+      const g = ctx.createLinearGradient(0, y + wave, W, y + wave + 20);
+      const hue = 0 + i * 8;
+      g.addColorStop(0, `hsla(${hue},80%,15%,0)`);
+      g.addColorStop(0.4, `hsla(${hue+10},60%,25%,0.15)`);
+      g.addColorStop(0.6, `hsla(${hue},70%,20%,0.1)`);
+      g.addColorStop(1, `hsla(${hue},80%,15%,0)`);
+      ctx.beginPath();
+      ctx.moveTo(0, y + wave);
+      for (let x = 0; x <= W; x += 10) {
+        const wy = y + Math.sin(t * 1.2 + x * 0.02 + i) * 20 + wave;
+        ctx.lineTo(x, wy);
+      }
+      ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+      ctx.fillStyle = g; ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── PLASMA (VISION) ──────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('plasma-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, t = 0;
+
+  function resize() {
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W; canvas.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    t += 0.008;
+    const imageData = ctx.createImageData(W, H);
+    const d = imageData.data;
+    const step = 4;
+    for (let y = 0; y < H; y += step) {
+      for (let x = 0; x < W; x += step) {
+        const v = Math.sin(x * 0.015 + t) +
+                  Math.sin(y * 0.012 + t * 0.7) +
+                  Math.sin((x + y) * 0.01 + t * 1.3) +
+                  Math.sin(Math.sqrt((x-W/2)**2+(y-H/2)**2) * 0.02 - t);
+        const n = (v + 4) / 8;
+        const r = Math.floor(n * 80);
+        const g2 = 0;
+        const b = Math.floor(n * 10);
+        for (let dy = 0; dy < step; dy++) for (let dx = 0; dx < step; dx++) {
+          const idx = ((y+dy)*W + (x+dx)) * 4;
+          d[idx]=r; d[idx+1]=g2; d[idx+2]=b; d[idx+3]=Math.floor(n*120+20);
+        }
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── WAVES (CONTACT) ──────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('waves-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, t = 0;
+
+  function resize() {
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W; canvas.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    t += 0.01;
+    ctx.clearRect(0, 0, W, H);
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      const baseY = H * 0.3 + i * (H * 0.15);
+      ctx.moveTo(0, baseY);
+      for (let x = 0; x <= W; x += 6) {
+        const y = baseY + Math.sin(x * 0.018 + t + i * 0.6) * (18 - i*2) + Math.sin(x * 0.008 + t * 0.5) * 10;
+        ctx.lineTo(x, y);
+      }
+      const opacity = 0.06 - i * 0.008;
+      ctx.strokeStyle = `rgba(139,0,0,${opacity})`;
+      ctx.lineWidth = 1; ctx.stroke();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── FLOATING LINES (MARQUEE) ─────────────────────────────────
+(function() {
+  const container = document.getElementById('float-lines');
+  if (!container) return;
+  for (let i = 0; i < 4; i++) {
+    const line = document.createElement('div');
+    const top = 20 + i * 20;
+    const dur = 3 + i * 1.5;
+    const delay = -i * 1.2;
+    line.style.cssText = `position:absolute;top:${top}%;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,0,0,0.4),transparent);animation:fline-move ${dur}s linear ${delay}s infinite`;
+    container.appendChild(line);
+  }
+})();
+</script>
+</body>
+</html>
