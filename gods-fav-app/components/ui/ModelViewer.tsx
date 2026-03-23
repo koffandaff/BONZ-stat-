@@ -22,6 +22,8 @@ export default function ModelViewer({ url, width = 400, height = 400 }: ModelVie
     mv.setAttribute("shadow-intensity", "1")
     mv.setAttribute("interaction-prompt", "none")
     mv.setAttribute("touch-action", "pan-y")
+    mv.setAttribute("loading", "eager")
+    mv.setAttribute("reveal", "auto")
     mv.style.width = "100%"
     mv.style.height = "100%"
     mv.style.backgroundColor = "transparent"

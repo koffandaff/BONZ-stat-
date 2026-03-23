@@ -1,7 +1,7 @@
 "use client"
 import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 // Lazy-load 3D viewer — no SSR
 const ModelViewer = dynamic(() => import("@/components/ui/ModelViewer"), { ssr: false })
@@ -30,7 +30,7 @@ export default function About() {
       }}>
         <div style={{ position: "relative", zIndex: 1 }}>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, margin: "-60px" }}
-            style={{ fontFamily: "var(--font-barlow)", fontSize: "9px", color: "#8B0000", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: "20px" }}>
+            style={{ fontFamily: "var(--font-barlow)", fontSize: "12px", fontWeight: 600, color: "#8B0000", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: "20px" }}>
             ABOUT THE BRAND
           </motion.div>
 
@@ -43,7 +43,7 @@ export default function About() {
           <div ref={ruleRef} style={{ height: "1px", background: "#8B0000", marginBottom: "32px", width: "0", boxShadow: "0 0 12px rgba(139,0,0,0.4)", transition: "width 0.9s ease" }} />
 
           <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, margin: "-60px" }} transition={{ delay: 0.12 }}
-            style={{ fontFamily: "var(--font-space-mono)", fontSize: "12px", color: "#444", lineHeight: 2.2, maxWidth: "400px", marginBottom: "48px" }}>
+            style={{ fontFamily: "var(--font-space-mono)", fontSize: "15px", fontWeight: 700, color: "#444", lineHeight: 2.2, maxWidth: "400px", marginBottom: "48px" }}>
             BONZ is a dark streetwear label born from the underground. No trends. No compromise. Crafted for those who were chosen.
           </motion.p>
 
@@ -51,7 +51,7 @@ export default function About() {
             {[{ num: "001", label: "Origin Drop" }, { num: "∞", label: "Always Limited" }, { num: "SS25", label: "Season" }].map((s, i) => (
               <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
                 <div style={{ fontFamily: "var(--font-bebas)", fontSize: "36px", color: "#8B0000", lineHeight: 1 }}>{s.num}</div>
-                <div style={{ fontFamily: "var(--font-barlow)", fontSize: "9px", color: "#444", letterSpacing: "0.2em", textTransform: "uppercase", marginTop: "4px" }}>{s.label}</div>
+                <div style={{ fontFamily: "var(--font-barlow)", fontSize: "12px", fontWeight: 600, color: "#444", letterSpacing: "0.2em", textTransform: "uppercase", marginTop: "4px" }}>{s.label}</div>
               </motion.div>
             ))}
           </div>
@@ -72,7 +72,7 @@ export default function About() {
           style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", width: "100%" }}
         >
           {/* Label */}
-          <div style={{ fontFamily: "var(--font-barlow)", fontSize: "9px", color: "#8B0000", letterSpacing: "0.5em", textTransform: "uppercase" }}>
+          <div style={{ fontFamily: "var(--font-barlow)", fontSize: "12px", fontWeight: 600, color: "#8B0000", letterSpacing: "0.5em", textTransform: "uppercase" }}>
             FIRST DROP PREVIEW
           </div>
 
@@ -82,7 +82,7 @@ export default function About() {
               style={{ fontFamily: "var(--font-cinzel)", fontSize: "clamp(22px, 2.5vw, 32px)", color: "white", letterSpacing: "0.08em", textShadow: "0 0 30px rgba(139,0,0,0.4)" }}>
               THE PHANTOM DRAPE
             </div>
-            <div style={{ fontFamily: "var(--font-space-mono)", fontSize: "10px", color: "#444", letterSpacing: "0.2em", marginTop: "8px" }}>
+            <div style={{ fontFamily: "var(--font-space-mono)", fontSize: "13px", fontWeight: 700, color: "#444", letterSpacing: "0.2em", marginTop: "8px" }}>
               SS25 · WEAR YOUR GHOST · 001
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function About() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowModel(!showModel)}
             style={{
-              fontFamily: "var(--font-barlow)", fontSize: "10px",
+              fontFamily: "var(--font-barlow)", fontSize: "13px", fontWeight: 600,
               letterSpacing: "0.45em", textTransform: "uppercase",
               padding: "14px 44px", marginTop: "8px",
               border: "1px solid #8B0000", color: showModel ? "white" : "#8B0000",
@@ -104,47 +104,39 @@ export default function About() {
             {showModel ? "✕  CLOSE" : "⬡  UNVEIL THE DROP"}
           </motion.button>
 
-          {/* 3D Model — appears when button is clicked */}
-          <AnimatePresence>
-            {showModel && (
-              <motion.div
-                initial={{ opacity: 0, height: 0, scale: 0.8 }}
-                animate={{ opacity: 1, height: 420, scale: 1 }}
-                exit={{ opacity: 0, height: 0, scale: 0.8 }}
-                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ width: "100%", maxWidth: 440, overflow: "hidden", border: "1px solid #1a1a1a", background: "rgba(0,0,0,0.6)" }}
-              >
-                {/* Smoke reveal layer */}
-                <motion.div
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: 0 }}
-                  transition={{ duration: 1.5, delay: 0.3, ease: "easeInOut" }}
-                  style={{
-                    position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none",
-                    background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, rgba(100,100,100,0.2) 40%, rgba(0,0,0,0.9) 80%)",
-                    filter: "blur(20px)",
-                  }}
-                />
-                <ModelViewer
-                  url="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/Corset/glTF-Binary/Corset.glb"
-                  width={440}
-                  height={420}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* 3D Model — ALWAYS IN DOM for background loading */}
+          <motion.div
+            initial={{ opacity: 0, height: 0, scale: 0.8 }}
+            animate={showModel ? { opacity: 1, height: 420, scale: 1 } : { opacity: 0, height: 0, scale: 0.8 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ width: "100%", maxWidth: 440, overflow: "hidden", border: "1px solid #1a1a1a", background: "rgba(0,0,0,0.6)", pointerEvents: showModel ? "auto" : "none" }}
+          >
+            {/* Smoke reveal layer */}
+            <motion.div
+              animate={showModel ? { opacity: 0 } : { opacity: 1 }}
+              transition={{ duration: 1.5, delay: showModel ? 0.3 : 0, ease: "easeInOut" }}
+              style={{
+                position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none",
+                background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, rgba(100,100,100,0.2) 40%, rgba(0,0,0,0.9) 80%)",
+                filter: "blur(20px)",
+              }}
+            />
+            <ModelViewer
+              url="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/Corset/glTF-Binary/Corset.glb"
+              width={440}
+              height={420}
+            />
+          </motion.div>
 
           {/* Hint text */}
-          {showModel && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              style={{ fontFamily: "var(--font-space-mono)", fontSize: "8px", color: "#333", letterSpacing: "0.3em", marginTop: "4px" }}
-            >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: showModel ? 1 : 0 }}
+            transition={{ delay: showModel ? 1 : 0 }}
+            style={{ fontFamily: "var(--font-space-mono)", fontSize: "11px", fontWeight: 700, color: "#333", letterSpacing: "0.3em", marginTop: "4px" }}
+          >
               DRAG TO ROTATE · PINCH TO ZOOM
-            </motion.div>
-          )}
+          </motion.div>
         </motion.div>
       </div>
     </section>

@@ -43,7 +43,7 @@ export default function Hero() {
           willChange: "transform, opacity, filter"
         }}
       >
-        <source src="/hero-portrait.mp4" type="video/mp4" />
+        <source src="https://res.cloudinary.com/dsne2l17k/video/upload/v1774290238/Video-457_y9416t.mp4" type="video/mp4" />
       </motion.video>
 
       <motion.video
@@ -62,7 +62,7 @@ export default function Hero() {
           willChange: "transform, opacity, filter"
         }}
       >
-        <source src="/hero-landscape.mp4" type="video/mp4" />
+        <source src="https://res.cloudinary.com/dsne2l17k/video/upload/v1774290256/My_First_Project_bqmzk5.mp4" type="video/mp4" />
       </motion.video>
 
       {/* Watermark cover (top-right on landscape) */}
@@ -121,7 +121,7 @@ export default function Hero() {
             justifyContent: "center", gap: "8px", textAlign: "center", padding: "0 20px"
           }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-              style={{ fontFamily: "var(--font-barlow)", fontSize: "9px", color: "#8B0000", letterSpacing: "0.55em", textTransform: "uppercase" }}>
+              style={{ fontFamily: "var(--font-barlow)", fontSize: "12px", fontWeight: 600, color: "#8B0000", letterSpacing: "0.55em", textTransform: "uppercase" }}>
               EST. 2025 · UNDERGROUND LABEL
             </motion.div>
 
@@ -153,7 +153,7 @@ export default function Hero() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
-              style={{ fontFamily: "var(--font-space-mono)", fontSize: "11px", color: "#555", letterSpacing: "0.2em", marginTop: "8px" }}>
+              style={{ fontFamily: "var(--font-space-mono)", fontSize: "14px", fontWeight: 700, color: "#555", letterSpacing: "0.2em", marginTop: "8px" }}>
               The chosen wear the void.
             </motion.div>
 
@@ -161,7 +161,7 @@ export default function Hero() {
               style={{ marginTop: "28px" }}>
               <Magnet padding={20} disabled={false} magnetStrength={3}>
                 <button onClick={scrollToAbout} style={{
-                  fontFamily: "var(--font-barlow)", fontSize: "10px", letterSpacing: "0.4em",
+                  fontFamily: "var(--font-barlow)", fontSize: "13px", fontWeight: 600, letterSpacing: "0.4em",
                   textTransform: "uppercase", padding: "12px 32px",
                   border: "1px solid #8B0000", color: "#8B0000",
                   backgroundColor: "transparent", cursor: "pointer", transition: "all 0.2s"
@@ -187,7 +187,7 @@ export default function Hero() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}
         style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
         <div style={{ width: "1px", height: "40px", background: "linear-gradient(to bottom, #8B0000, transparent)" }} />
-        <div style={{ fontFamily: "var(--font-space-mono)", fontSize: "7px", color: "#333", letterSpacing: "0.3em" }}>SCROLL</div>
+        <div style={{ fontFamily: "var(--font-space-mono)", fontSize: "10px", fontWeight: 700, color: "#333", letterSpacing: "0.3em" }}>SCROLL</div>
       </motion.div>
     </section>
   )

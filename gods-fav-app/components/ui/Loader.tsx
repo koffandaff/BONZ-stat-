@@ -17,9 +17,10 @@ function SmokeWisp({ delay, x, size, dur }: { delay: number; x: string; size: nu
         width: size,
         height: size,
         borderRadius: "50%",
-        background: "radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, rgba(200,200,200,0.12) 40%, transparent 70%)",
-        filter: `blur(${size * 0.4}px)`,
+        background: "radial-gradient(ellipse, rgba(255,255,255,0.2) 0%, rgba(200,200,200,0.08) 40%, transparent 70%)",
+        filter: `blur(${size * 0.3}px)`,
         pointerEvents: "none",
+        willChange: "transform, opacity"
       }}
     />
   )
@@ -59,13 +60,9 @@ export default function Loader({ onFinish }: { onFinish: () => void }) {
       {exiting && (
         <>
           <SmokeWisp delay={0} x="20%" size={120} dur={1.8} />
-          <SmokeWisp delay={0.1} x="50%" size={160} dur={2.0} />
           <SmokeWisp delay={0.15} x="70%" size={100} dur={1.6} />
-          <SmokeWisp delay={0.2} x="35%" size={140} dur={1.9} />
-          <SmokeWisp delay={0.25} x="60%" size={90} dur={1.7} />
+          <SmokeWisp delay={0.25} x="45%" size={180} dur={2.2} />
           <SmokeWisp delay={0.05} x="10%" size={110} dur={2.1} />
-          <SmokeWisp delay={0.3} x="80%" size={130} dur={1.8} />
-          <SmokeWisp delay={0.12} x="45%" size={180} dur={2.2} />
         </>
       )}
 
@@ -76,8 +73,9 @@ export default function Loader({ onFinish }: { onFinish: () => void }) {
         style={{
           position: "absolute", inset: 0,
           background: "radial-gradient(ellipse 100% 80% at 50% 60%, rgba(255,255,255,0.1) 0%, rgba(200,200,200,0.15) 50%, transparent 80%)",
-          filter: "blur(40px)",
-          pointerEvents: "none"
+          filter: "blur(30px)",
+          pointerEvents: "none",
+          willChange: "opacity"
         }}
       />
 

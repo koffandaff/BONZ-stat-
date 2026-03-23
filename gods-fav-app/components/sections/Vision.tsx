@@ -27,7 +27,7 @@ export default function Vision() {
 
       <div className="rp" style={{ position: "relative", zIndex: 2, maxWidth: "700px", margin: "auto", padding: "100px 40px", textAlign: "center" }}>
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-          style={{ fontFamily: "var(--font-barlow)", fontSize: "9px", color: "#8B0000", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: "24px" }}>
+          style={{ fontFamily: "var(--font-barlow)", fontSize: "12px", fontWeight: 600, color: "#8B0000", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: "24px" }}>
           OUR VISION
         </motion.div>
 
@@ -41,7 +41,7 @@ export default function Vision() {
           style={{ height: "1px", background: "#8B0000", margin: "28px auto", boxShadow: "0 0 12px rgba(139,0,0,0.5)" }} />
 
         <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-          style={{ fontFamily: "var(--font-space-mono)", fontSize: "11px", color: "#444", lineHeight: 2.4, marginBottom: "52px" }}>
+          style={{ fontFamily: "var(--font-space-mono)", fontSize: "14px", fontWeight: 700, color: "#444", lineHeight: 2.4, marginBottom: "52px" }}>
           Crafted for the few. Remembered by all.<br />Dark culture has a uniform — this is it.
         </motion.p>
 
@@ -57,7 +57,7 @@ export default function Vision() {
                 <line x1="12" y1="2" x2="12" y2="22" /><line x1="2" y1="12" x2="22" y2="12" /><circle cx="12" cy="12" r="3" />
               </svg>
               <div style={{ fontFamily: "var(--font-bebas)", fontSize: "20px", color: "white", letterSpacing: "0.1em" }}>{p.title}</div>
-              <div style={{ fontFamily: "var(--font-space-mono)", fontSize: "10px", color: "#444" }}>{p.text}</div>
+              <div style={{ fontFamily: "var(--font-space-mono)", fontSize: "13px", fontWeight: 700, color: "#444" }}>{p.text}</div>
             </motion.div>
           ))}
         </div>

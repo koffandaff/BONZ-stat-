@@ -40,7 +40,7 @@ export default function Nav() {
         {LINKS.map(link => (
           <Magnet key={link} padding={14} disabled={false} magnetStrength={2}>
             <button onClick={() => scrollTo(link)} style={{
-              fontFamily: "var(--font-barlow)", fontSize: "10px", letterSpacing: "0.25em",
+              fontFamily: "var(--font-barlow)", fontSize: "13px", fontWeight: 600, letterSpacing: "0.25em",
               textTransform: "uppercase", color: "var(--c-ghost)", background: "none", border: "none",
               cursor: "pointer", transition: "color 0.2s", padding: "4px 0"
             }}
